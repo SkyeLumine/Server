@@ -1,9 +1,19 @@
+package lightleaf.netcom.common;
+
 public class Logger {
 
     private static boolean lastLogWasRelog = false;
 
     public static void info(final String msg){
         log("INFO: " + msg);
+    }
+
+    public static void received(final String msg){
+        log("RECEIVED: " + msg);
+    }
+
+    public static void sent(final String msg){
+        log("SENT: " + msg);
     }
 
     public static void debug(final String msg){
@@ -16,7 +26,7 @@ public class Logger {
 
     public static void error(final String msg, final Throwable exception){
         log("ERROR: " + msg);
-        log("ERROR: " + exception);
+        exception.printStackTrace();
     }
 
     public static void relogInfo(final String msg){
