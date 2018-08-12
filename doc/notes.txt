@@ -1,0 +1,11 @@
+This Server is to be a basic implementation of a RuneScape server but can be stripped of its command-processing
+to be used as a general-purpose server. A general-purpose server should have the minimal functionality of receiving
+and communicating messages to its clients. Processing of specific messages should be streamlined. (Perhaps handled by
+adding an enum element to be used in a switch statement that will execute the desired behavior.).
+
+A Runescape server maintains up-to-date game state for all clients and reflects this information back to clients. The
+Server is responsible for validating all game-state related requests to ensure they abide by the game's rules. The
+game-state request requirements for this project are:
+    1. Clients should be able to send chat messages that can be received by all other clients.
+    2. Clients can "click" on their screen to move their character.
+    3. More to come...

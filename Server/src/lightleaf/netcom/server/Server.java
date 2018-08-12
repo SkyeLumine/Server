@@ -15,8 +15,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Server {
-
-
     private static final InetSocketAddress SERVER_ADDRESS = new InetSocketAddress("localhost", 4242);
     private static final int CLIENT_CLOSED_CONNECTION = -1;
 
@@ -91,8 +89,12 @@ public class Server {
             clientChannel.close();
             Logger.info("Client closed connection");
         } else {
-            answerWithEcho(clientChannel, buffer);
+            processMessage(clientChannel, buffer);
         }
+    }
+
+    private void processMessage(final SocketChannel clientChannel, final ByteBuffer buffer) throws IOException {
+
     }
 
     private static void answerWithEcho(final SocketChannel clientChannel, final ByteBuffer buffer) throws IOException {
@@ -115,8 +117,18 @@ public class Server {
     }
 
     public void stop() throws Exception {
-        serverChannel.close();
-        selector.close();
-        isRunning.set(false);
+        try {
+            serverChannel.close();
+        } catch(final IOException e){
+            Logger.error("Failed to close server channel");
+        } finally {
+            try {
+                selector.close();
+            } catch(final IOException e){
+                Logger.error("Failed to close server selector");
+            } finally {
+                isRunning.set(false);
+            }
+        }
     }
 }
