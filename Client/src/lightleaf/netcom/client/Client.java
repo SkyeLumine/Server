@@ -11,29 +11,43 @@ import java.util.Optional;
 
 public class Client {
 
-    private final String name;
     private final InetSocketAddress serverAddress = new InetSocketAddress("localhost", 4242);
 
     private Optional<SocketChannel> serverChannel = Optional.empty();
-
-    public Client(final String name){
-        this.name = name;
-    }
 
     public void connect() throws IOException {
         serverChannel = Optional.of(SocketChannel.open());
         serverChannel.get().connect(serverAddress);
     }
 
+    public boolean isConnected(){
+        if(serverChannel.isPresent()){
+            if(serverChannel.get().isConnected()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void close() throws IOException {
         serverChannel.get().close();
+    }
+
+    public void sendToServer(final ByteBuffer msg){
+        serverChannel.ifPresent(server -> {
+            try {
+                server.write(msg);
+                Logger.debug("Sent to server: " + new String(msg.array()));
+            } catch(final IOException e){
+                Logger.error("Failed to send message to server", e);
+            }
+        });
     }
 
     public void sendForEcho(final String msg) {
         serverChannel.ifPresent(channel -> {
             try {
-                final String msgWithHeader = name + " " + msg;
-                final ByteBuffer buffer = ByteBuffer.wrap(msgWithHeader.getBytes());
+                final ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes());
                 channel.write(buffer);
                 Logger.sent(new String(buffer.array()));
                 buffer.clear();

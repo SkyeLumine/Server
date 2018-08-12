@@ -13,7 +13,7 @@ public class ClientDriver {
         final ClientPool clientPool = new ClientPool();
 
         for(int i = 0; i < numClients; ++i){
-            clientPool.add(new Client("Client #" + Integer.toString(i)));
+            clientPool.add(new Client());
         }
 
         try {

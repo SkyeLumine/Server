@@ -1,6 +1,9 @@
 package lightleaf.netcom.server;
 
+import entities.Constants;
 import lightleaf.netcom.common.Logger;
+import lightleaf.netcom.common.MessageHeaderIndex;
+import lightleaf.netcom.common.OpCode;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -23,8 +26,18 @@ public class Server {
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private Selector selector;
     private ServerSocketChannel serverChannel;
+    private PlayerDatabase playerDatabase;
+    private int count = 0;
 
-    private Server(){}
+    private Server(){
+        try {
+            playerDatabase = new PlayerDatabase();
+        } catch(final IOException e){
+            Logger.error("Failed to load player database", e);
+            Logger.error("Server is shutting down");
+            System.exit(1);
+        }
+    }
 
     public static Server getServer(){
         if(!server.isPresent()) {
@@ -95,14 +108,18 @@ public class Server {
 
     private void processMessage(final SocketChannel clientChannel, final ByteBuffer buffer) throws IOException {
 
-    }
+        if(buffer.get(MessageHeaderIndex.OPCODE) == OpCode.LOGIN){
+            final String[] loginDetails = new String(buffer.array()).substring(MessageHeaderIndex.OPCODE).trim().split("\0");
+            final String username = loginDetails[0];
+            final String password = loginDetails[1];
 
-    private static void answerWithEcho(final SocketChannel clientChannel, final ByteBuffer buffer) throws IOException {
-        clientChannel.read(buffer);
-        Logger.received(new String(buffer.array()));
-        buffer.flip();
-        clientChannel.write(buffer);
-        Logger.sent(new String(buffer.array()));
+            if(playerDatabase.loginDetailsAreValid(username, password)){
+                Logger.info(username + " successfully logged in");
+                Logger.info(++count + " of " + Constants.ACCOUNTS + " connected");
+            } else {
+                Logger.info(username + " failed to log in");
+            }
+        }
     }
 
     private void registerClient(){
